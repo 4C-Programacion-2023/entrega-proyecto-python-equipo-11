@@ -1,11 +1,21 @@
 import tkinter as tk
 from tkinter import ttk, messagebox
-import funciones
-import clases
+import random
+vuelos_output = None
+num_vuelo_entry = None
+origen_entry = None
+destino_entry = None
+fechasalida_entry = None
+fechavuelta_entry = None
+vuelos_agregados = []
+
+
+
 
 usuarios = {
     "admin": "password"
 }
+
 
 def registrar_usuario():
     nuevo_usuario = nuevo_usuario_entry.get()
@@ -30,49 +40,138 @@ def login():
     else:
         messagebox.showerror("Error", "Credenciales incorrectas")
 
-def mostrar_vuelos():
-    vuelos_output.delete("1.0", "end")
-    vuelos_output.insert("end", "\n".join(list_vuelos))
 
 def agregar_nuevo_vuelo():
-    numerovuelo = int(num_vuelo_entry.get())
+    global vuelos_agregados_text
+    numerovuelo = num_vuelo_entry.get()
     origenn = origen_entry.get()
     destinoo = destino_entry.get()
     fechasalidaa = fechasalida_entry.get()
     fechavueltaa = fechavuelta_entry.get()
-    funciones.agregar_vuelo(numerovuelo, origenn, destinoo, fechasalidaa, fechavueltaa, list_vuelos)
-    messagebox.showinfo("Éxito", "Vuelo agregado exitosamente.")
-    num_vuelo_entry.delete(0, "end")
-    origen_entry.delete(0, "end")
-    destino_entry.delete(0, "end")
-    fechasalida_entry.delete(0, "end")
-    fechallegada_entry.delete(0, "end")
+
+    if numerovuelo and origenn and destinoo and fechasalidaa and fechavueltaa:
+        try:
+            numerovuelo = int(numerovuelo)
+
+            # Resto del código para agregar el vuelo
+            vuelo = {
+                "numero": numerovuelo,
+                "origen": origenn,
+                "destino": destinoo,
+                "fecha_salida": fechasalidaa,
+                "fecha_vuelta": fechavueltaa
+            }
+            list_vuelos.append(vuelo)
+            vuelos_agregados.append(vuelo)
+
+            vuelos_agregados_text.delete("1.0", "end")
+            num_vuelo_entry.delete(0, "end")
+            origen_entry.delete(0, "end")
+            destino_entry.delete(0, "end")
+            fechasalida_entry.delete(0, "end")
+            fechavuelta_entry.delete(0, "end")
+
+            # Actualizar el contenido del Text widget con la lista de vuelos agregados
+            vuelos_agregados_text.delete("1.0", "end")
+            for vuelo in list_vuelos:
+                vuelos_agregados_text.insert("end",
+                                             f"Vuelo {vuelo['numero']}: \nOrigen: {vuelo['origen']} \nDestino: {vuelo['destino']} \nFecha de Salida: {vuelo['fecha_salida']}  \nFecha de Vuelta: {vuelo['fecha_vuelta']} \n==============================  \n ")
+
+            messagebox.showinfo("Éxito", "Vuelo agregado exitosamente.")
+        except ValueError:
+            messagebox.showerror("Error", "El número de vuelo debe ser un valor numérico.")
+    else:
+        messagebox.showerror("Error", "Completa todos los campos.")
+
+
 
 def eliminar_vuelo():
-    numerovuelo = int(eliminar_num_vuelo_entry.get())
-    funciones.eliminar_vuelo(numerovuelo, list_vuelos)
-    messagebox.showinfo("Éxito", "Vuelo eliminado exitosamente.")
+    global vuelos_agregados_text, eliminar_num_vuelo_entry
+    numerovuelo = eliminar_num_vuelo_entry.get()
+
+    if numerovuelo:
+        try:
+            numerovuelo = int(numerovuelo)
+
+            # Resto del código para eliminar el vuelo
+            vuelo_eliminado = None
+            for vuelo in vuelos_agregados:
+                if vuelo['numero'] == numerovuelo:
+                    vuelo_eliminado = vuelo
+                    break
+
+            if vuelo_eliminado:
+                vuelos_agregados.remove(vuelo_eliminado)
+
+                vuelos_agregados_text.delete("1.0", "end")
+                for vuelo in vuelos_agregados:
+                    vuelos_agregados_text.insert("end",
+                                                 f"Vuelo {vuelo['numero']}: \nOrigen: {vuelo['origen']} \nDestino: {vuelo['destino']} \nFecha de Salida: {vuelo['fecha_salida']}  \nFecha de Vuelta: {vuelo['fecha_vuelta']} \n==============================  \n ")
+
+                messagebox.showinfo("Éxito", "Vuelo eliminado exitosamente.")
+            else:
+                messagebox.showerror("Error", "No se encontró un vuelo con ese número.")
+        except ValueError:
+            messagebox.showerror("Error", "El número de vuelo debe ser un valor numérico.")
+    else:
+        messagebox.showerror("Error", "Ingresa el número de vuelo a eliminar.")
+
     eliminar_num_vuelo_entry.delete(0, "end")
 
-def main_interface():
-    main_window = tk.Tk()
-    main_window.title("Gestión de Vuelos y Itinerarios")
 
+
+
+def mostrar_vuelos_aleatorios():
+    aeropuertos = ['JFK', 'LAX', 'ORD', 'ATL', 'DFW', 'DEN', 'SFO', 'SEA', 'LAS', 'MIA']
+    global vuelos_output
+    vuelos_text = ""
+    for _ in range(20):
+        numero_vuelo = random.randint(100, 999)
+        origen = random.choice(aeropuertos)
+        destino = random.choice(aeropuertos)
+        while destino == origen:
+            destino = random.choice(aeropuertos)
+        fecha_salida = f"{random.randint(1, 28)}/{random.randint(1, 12)}/2023"
+        fecha_vuelta = f"{random.randint(1, 28)}/{random.randint(1, 12)}/2023"
+
+        vuelos_text += f"Vuelo {numero_vuelo}:\n"
+        vuelos_text += f"Origen: {origen}\n"
+        vuelos_text += f"Destino: {destino}\n"
+        vuelos_text += f"Fecha de Salida: {fecha_salida}\n"
+        vuelos_text += f"Fecha de Vuelta: {fecha_vuelta}\n"
+        vuelos_text += "=" * 30 + "\n"
+
+    vuelos_output.delete("1.0", "end")  # Borra el contenido actual del Text widget
+    vuelos_output.insert("end", vuelos_text)  # Inserta los vuelos aleatorios en el Text widget
+
+def main_interface():
+    global vuelos_agregados_text
+    global num_vuelo_entry, origen_entry, destino_entry, fechasalida_entry, fechavuelta_entry, eliminar_num_vuelo_entry
+    main_window = tk.Tk()
+    main_window.title("Aeropuerto Villada")
+gitgi
     tab_control = ttk.Notebook(main_window)
 
     vuelos_tab = ttk.Frame(tab_control)
-    itinerarios_tab = ttk.Frame(tab_control)
+
 
     tab_control.add(vuelos_tab, text="Gestión de Vuelos")
-    tab_control.add(itinerarios_tab, text="Gestión de Itinerarios")
+
 
     tab_control.pack(expand=1, fill="both")
+
+
 
     agregar_vuelo_button = tk.Button(vuelos_tab, text="Agregar Nuevo Vuelo", command=agregar_nuevo_vuelo)
     agregar_vuelo_button.pack()
 
     eliminar_vuelo_button = tk.Button(vuelos_tab, text="Eliminar Vuelo", command=eliminar_vuelo)
     eliminar_vuelo_button.pack()
+
+    eliminar_num_vuelo_label = tk.Label(vuelos_tab, text="Número de Vuelo a Eliminar:")
+    eliminar_num_vuelo_label.pack()
+    eliminar_num_vuelo_entry = tk.Entry(vuelos_tab)
+    eliminar_num_vuelo_entry.pack()
 
     num_vuelo_label = tk.Label(vuelos_tab, text="Número de Vuelo:")
     num_vuelo_label.pack()
@@ -99,11 +198,17 @@ def main_interface():
     fechavuelta_entry = tk.Entry(vuelos_tab)
     fechavuelta_entry.pack()
 
+    global vuelos_output
+
+    mostrar_vuelos_aleatorios_button = tk.Button(vuelos_tab, text="Mostrar Vuelos Disponibles",
+                                                 command=mostrar_vuelos_aleatorios)
+    mostrar_vuelos_aleatorios_button.pack()
+
     vuelos_output = tk.Text(vuelos_tab, height=10, width=50)
     vuelos_output.pack()
 
-    mostrar_vuelos_button = tk.Button(vuelos_tab, text="Mostrar Vuelos Disponibles", command=mostrar_vuelos)
-    mostrar_vuelos_button.pack()
+    vuelos_agregados_text = tk.Text(vuelos_tab, height=10, width=50)
+    vuelos_agregados_text.pack()
 
     main_window.mainloop()
 
@@ -141,7 +246,7 @@ login_button = tk.Button(login_window, text="Iniciar Sesión", command=login)
 login_button.pack()
 
 list_vuelos = []
-list_itinerarios = []
+
 
 login_window.mainloop()
 
