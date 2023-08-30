@@ -149,7 +149,7 @@ def main_interface():
     global num_vuelo_entry, origen_entry, destino_entry, fechasalida_entry, fechavuelta_entry, eliminar_num_vuelo_entry
     main_window = tk.Tk()
     main_window.title("Aeropuerto Villada")
-gitgi
+
     tab_control = ttk.Notebook(main_window)
 
     vuelos_tab = ttk.Frame(tab_control)
